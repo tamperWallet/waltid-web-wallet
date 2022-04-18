@@ -151,6 +151,8 @@ export default {
   async asyncData ({ $axios }) {
     // TODO: select DID to use
     const credList = await $axios.$get("/api/wallet/credentials/list")
+    console.log("cred list: \n")
+    console.log(credList)
     const credentials = credList.list
     return { credentials }
   },

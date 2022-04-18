@@ -53,6 +53,74 @@
                                 <h5>{{$t('CREDENTIAL.DID')}}</h5>
                                 <p>{{credential.credentialSubject.id}}</p>
                             </span>
+
+      <br><br>
+      <span class="col-12 px-10">
+                                <h7>Grading info:</h7>
+                                
+                            </span>
+      
+      <span class="col-12 px-3">
+                                <h5>Title</h5>
+                                <p>{{credential.credentialSubject.gradingScheme.title}}</p>
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Grade</h5>
+                                <p>{{credential.credentialSubject.gradingScheme.description}}</p>
+                            </span>
+
+      <span class="col-12 px-10">
+                                <h7>Learning achievement:</h7>
+                                
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Title</h5>
+                                <p>{{credential.credentialSubject.learningAchievement.title}}</p>
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Description</h5>
+                                <p>{{credential.credentialSubject.learningAchievement.description}}</p>
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Additional Notes</h5>
+                                
+                                  <p v-for="note in credential.credentialSubject.learningAchievement.additionalNote" v-bind:key="note">{{note}}</p> 
+                                  
+                                
+                            </span>
+      <span class="col-14 px-10">
+                                <h7>Awarding opportunity info:</h7>
+                                
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Form code</h5>
+                                
+                                  <p>{{credential.credentialSubject.awardingOpportunity.id}}</p>
+                                  
+                                
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Title</h5>
+                                
+                                  <p>{{credential.credentialSubject.awardingOpportunity.identifier}}</p>
+                                  
+                                
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Issuer code</h5>
+                                
+                                  <p>{{credential.credentialSubject.awardingOpportunity.awardingBody.registration}}</p>
+                                  
+                                
+                            </span>
+      <span class="col-12 px-3">
+                                <h5>Issued companies manager</h5>
+                                
+                                  <p>{{credential.credentialSubject.awardingOpportunity.awardingBody.preferredName}}</p>
+                                  
+                                
+                            </span>                                                                  
+                                                 
     </div>
   </div>
 </template>
@@ -69,6 +137,13 @@ export default {
     return {
       moment: moment
     }
+  },
+  computed: {
+    additionalNotes () {
+      console.log("locales", this.$i18n.locales)
+      return this.$i18n.locales.filter(i => i.code !== this.$i18n.locale)
+    }
+
   }
 }
 </script>

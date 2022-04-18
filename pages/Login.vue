@@ -171,9 +171,11 @@ export default {
           const loginResponse = await this.$auth.loginWith("local", {
             data: {
             id: this.email,
+            email: this.email,
             password: this.password
            }
           })
+          console.log(loginResponse)
           this.$auth.setUser(loginResponse.data)
           this.$router.push("/")
           //this.loginLoading=false

@@ -1,4 +1,6 @@
-<template>
+ <template>
+ 
+ 
     <section class="_main bg-light row align-items-center justify-content-center justify-content-lg-start justify-content-md-center justify-content-sm-center p-0">
         <div id="widget" class="_form d-black bg-w shadow-lg text-center">
             <div class="_toggle-menu position-sticky d-flex justify-content-end col-12 align-items-center px-3">
@@ -18,8 +20,10 @@
                               <div class="col-2">
                               <input class="form-check-input me-4" type="checkbox" :id="'credential-' + credential.id" :name="'credential-' + credential.id" :value="credential.id" v-model="checkedCredentialIds">
                               </div>
-                              <div class="col-10">
-                              <a @click="selectedCredential = credential">{{credential.title ? credential.title : $t('CREDENTIAL.TYPE.' + credential.type[credential.type.length-1]) }}</a>
+                              <div class="col-8">
+                              <!-- <a @click="selectedCredential = credential">{{credential.title ? credential.title : $t('CREDENTIAL.TYPE'  + credential.type[credential.type.length-1]) }}</a> -->
+
+                              <a @click="selectedCredential = credential"> {{credential.credentialSubject.identifier ? credential.credentialSubject.identifier : "KTU " }} {{credential.title ? credential.title : credential.type[credential.type.length-1] }}</a>
                               </div>
                             </div>
                           </div>
@@ -32,7 +36,8 @@
                         </div>
                         <div class="_button mt-4" v-if="presentableCredentials.length > 0 || requiredSchemaIds.length == 0">
                             <button href="#share" class="_share col-12 mb-2" @click="peSubmit()">Share</button>
-                            <a href="#reject" class="_reject col-12">Reject</a>
+                            <!-- <a href="#reject" class="_reject col-12">Reject</a> -->
+                            <NuxtLink to="/">Reject</NuxtLink>
                         </div>
                         <div class="mt-4" v-if="presentationSessionInfo.availableIssuers != null && presentationSessionInfo.availableIssuers.length > 0">
                           <div><b>Available issuers:</b></div>
@@ -41,9 +46,9 @@
                               {{ issuer.description }}
                             </option>
                           </select>
-                          <div class="_button">
+                           <div class="_button">
                           <button href="#fetch" class="_share col-12 mb-2" @click="fetchFromIssuer()" :disabled="selectedIssuer == null">Fetch credential from issuer</button>
-                          </div>
+                          </div> 
                         </div>
                     </div>
                 </div>
@@ -88,9 +93,11 @@
             <form ref="responseForm" method="post" :action="presentationSessionInfo.req.redirect_uri">
               <input ref="responseIdToken" type="hidden" name="id_token" >
               <input ref="responseVpToken" type="hidden" name="vp_token" >
+              <input ref="responseState" type="hidden" name="state" >
             </form>
         </div>
     </section>
+   
 </template>
 
 <script>
@@ -108,10 +115,49 @@ export default {
       selectedIssuer: null
     }
   },
+  // async asyncData ({ $axios, query, store }) {
+  //   if(query.sessionId != null) {
+  //     const presentationSessionInfo = await $axios.$get("/api/wallet/siopv2/continuePresentation", { params: { ...query, did: store.state.wallet.currentDid } })
+  //     console.log(presentationSessionInfo)
+  //     let presentableCredentials = []
+  //     if(presentationSessionInfo.presentableCredentials.length > 0) {
+  //       var params = new URLSearchParams();
+  //       presentationSessionInfo.presentableCredentials.map(c => c.credentialId).forEach(id => params.append("id", id))
+  //       const requestCfg = {
+  //         params: params
+  //       };
+  //       const presentableCredentialsList = await $axios.$get("/api/wallet/credentials/list", requestCfg)
+  //       presentableCredentials = presentableCredentialsList.list
+  //     }
+  //     const checkedCredentialIds = presentableCredentials.map(cred => cred.id)
+
+  //     // console.log("required schema ids:")
+  //     // console.log(this.presentationSessionInfo.req.claims.vp_token.presentation_definition.input_descriptors.map(idesc => idesc.schema.uri))
+  //     let selectedIssuer = null
+  //     if(presentationSessionInfo.availableIssuers != null && presentationSessionInfo.availableIssuers.length > 0) {
+  //       selectedIssuer = presentationSessionInfo.availableIssuers[0].id
+  //     }
+  //     console.log("required schema ids:")
+  //     console.log(this.presentationSessionInfo.req)
+  //     return { presentationSessionInfo, presentableCredentials, selectedIssuer, checkedCredentialIds }
+  //   }
+  // },
   async asyncData ({ $axios, query, store }) {
     if(query.sessionId != null) {
+
+      
+      
       const presentationSessionInfo = await $axios.$get("/api/wallet/siopv2/continuePresentation", { params: { ...query, did: store.state.wallet.currentDid } })
+      console.log(presentationSessionInfo)
       let presentableCredentials = []
+      if(presentationSessionInfo.req.claims.credentials){
+            console.log("present credentials:")
+            console.log(presentationSessionInfo.req.claims.credentials[0])
+            presentableCredentials.push(presentationSessionInfo.req.claims.credentials[0])
+      }
+
+      
+
       if(presentationSessionInfo.presentableCredentials.length > 0) {
         var params = new URLSearchParams();
         presentationSessionInfo.presentableCredentials.map(c => c.credentialId).forEach(id => params.append("id", id))
@@ -121,12 +167,34 @@ export default {
         const presentableCredentialsList = await $axios.$get("/api/wallet/credentials/list", requestCfg)
         presentableCredentials = presentableCredentialsList.list
       }
+      console.log("presentables credentials:")
+      console.log(presentableCredentials)
+
+      console.log("presentable session info:")
+      console.log(presentationSessionInfo)
+
+
       const checkedCredentialIds = presentableCredentials.map(cred => cred.id)
+
+      console.log("checked credentials:")
+      console.log(checkedCredentialIds)
+
+
       let selectedIssuer = null
       if(presentationSessionInfo.availableIssuers != null && presentationSessionInfo.availableIssuers.length > 0) {
         selectedIssuer = presentationSessionInfo.availableIssuers[0].id
       }
+
+      console.log("selectedIssuer")
+      console.log(selectedIssuer)
+
+
+
+
+      console.log("presentationSessionInfo:")
+      console.log(presentationSessionInfo)
       return { presentationSessionInfo, presentableCredentials, selectedIssuer, checkedCredentialIds }
+      
     }
   },
   computed: {
@@ -150,15 +218,24 @@ export default {
           }
     },
     peSubmit: async function() {
+      
       const selectedPresentableCredentials = this.presentationSessionInfo.presentableCredentials.filter(c => this.checkedCredentialIds.findIndex(id => id == c.credentialId) >= 0)
+
+      console.log("selected credentials: \n")
+      console.log(selectedPresentableCredentials)
       if(this.presentationSessionInfo.isPassiveIssuanceSession) {
         const issuanceSessionId = await this.$axios.$post("/api/wallet/siopv2/fulfillPassiveIssuance", selectedPresentableCredentials, { params: { sessionId: this.presentationSessionInfo.id }})
+        
+        console.log("issuance session id:")
+        console.log(issuanceSessionId)
+
         this.$router.push("/ReceiveCredential?sessionId=" + issuanceSessionId)
       } else {
         const siopResp = await this.$axios.$post("/api/wallet/siopv2/fulfillPresentation", selectedPresentableCredentials, { params: { sessionId: this.presentationSessionInfo.id }})
         console.log("PE Response:", siopResp)
         this.$refs.responseIdToken.value = siopResp.id_token
         this.$refs.responseVpToken.value = siopResp.vp_token
+        this.$refs.responseState.value = siopResp.state
         this.$refs.responseForm.submit()
       }
     },

@@ -94,6 +94,8 @@ export default {
   async asyncData ({ $axios, query }) {
     if(query.sessionId != null) {
       const issuanceSessionInfo = await $axios.$get("/api/wallet/siopv2/issuanceSessionInfo", { params: query })
+      console.log("issuanceSessionInfo")
+      console.log(issuanceSessionInfo)
       return { issuanceSessionInfo }
     }
   },
